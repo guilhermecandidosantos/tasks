@@ -13,11 +13,11 @@ class LoginWithGitHubController {
     try {
       const { gitHubId, username, avatarUrl } = await gitHubOAuth(code);
 
-      await loginWithGitHubUseCase.execute({
+      const tokens = await loginWithGitHubUseCase.execute({
         gitHubId, username, avatarUrl,
       });
 
-      return response.status(200).json({ message: "Success!" });
+      return response.status(200).json({ tokens });
     } catch (error) {
       return response.status(400).json({ message: error.message });
     }

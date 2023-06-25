@@ -13,12 +13,14 @@ class UsersRepository implements IUsersRepository {
 
   async create({
     id, gitHubId, username, avatarUrl, createdAt,
-  }: User): Promise<void> {
-    await this.prisma.user.create({
+  }: User): Promise<User> {
+    const user = await this.prisma.user.create({
       data: {
         id, gitHubId, username, avatarUrl, createdAt,
       },
     });
+
+    return user;
   }
 
   async findByGitHubId(gitHubId: number): Promise<User> {

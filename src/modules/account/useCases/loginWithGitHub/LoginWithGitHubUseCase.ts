@@ -1,5 +1,7 @@
+import { generateNewRefreshToken, generateTokens } from "lib/tokens";
 import { User } from "modules/account/entities/User";
 import { IUsersRepository } from "modules/account/repositories/IUsersRepository";
+import { IUsersTokenRepository } from "modules/account/repositories/IUsersTokenRepository";
 import { IDayJSProvider } from "shared/container/providers/DayJSProvider/repositories/IDayJSProvider";
 import { AppError } from "shared/http/errors/AppError";
 import { inject, injectable } from "tsyringe";
@@ -12,6 +14,8 @@ class LoginWithGitHubUseCase {
     private dayJSProvider: IDayJSProvider,
     @inject("UsersRepository")
     private usersRepository: IUsersRepository,
+    @inject("UsersTokenRepository")
+    private usersTokenRepository: IUsersTokenRepository,
   ) {}
 
   async execute({
@@ -21,17 +25,57 @@ class LoginWithGitHubUseCase {
 
     const id = v4();
 
-    const user = await this.usersRepository.findByGitHubId(gitHubId);
+    let user = await this.usersRepository.findByGitHubId(gitHubId);
 
     if (!user) {
       try {
-        await this.usersRepository.create({
+        user = await this.usersRepository.create({
           id, gitHubId, username, avatarUrl, createdAt,
         });
       } catch (error) {
         throw new AppError(error.message);
       }
     }
+
+    const usersToken = await this.usersTokenRepository.findByUserId(user.id);
+
+    let tokens = Object();
+
+    const tokenId = v4();
+
+    const expiresIn = this.dayJSProvider.expiresIn15Minutes();
+
+    if (!usersToken) {
+      tokens = generateTokens(user.id, user.avatarUrl);
+
+      await this.usersTokenRepository.create({
+        id: tokenId,
+        userId: user.id,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        createdAt,
+        expiresIn,
+      });
+    } else {
+      try {
+        await this.usersTokenRepository.deleteTokenWithUserId(user.id);
+
+        tokens = generateTokens(user.id, user.avatarUrl);
+
+        await this.usersTokenRepository.create({
+          id: tokenId,
+          userId: user.id,
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+          createdAt,
+          expiresIn,
+        });
+      } catch (error) {
+        throw new AppError(error.message);
+      }
+    }
+
+    return tokens;
   }
 }
 

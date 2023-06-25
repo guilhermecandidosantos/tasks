@@ -11,11 +11,25 @@ datasource db {
 }
 
 model User {
-  id        String @id
-  gitHubId  Int    @unique
-  username  String @unique
+  id        String     @id
+  gitHubId  Int        @unique
+  username  String     @unique
   avatarUrl String
   createdAt Int
+  userToken UserToken?
 
   @@map("users")
+}
+
+model UserToken {
+  id           String @id
+  userId       String @unique
+  accessToken  String
+  refreshToken String
+  createdAt    Int
+  expiresIn    Int
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("usersToken")
 }

@@ -1,5 +1,3 @@
-import { v4 } from "uuid";
-
 class User {
   id?: string;
   gitHubId: number;
