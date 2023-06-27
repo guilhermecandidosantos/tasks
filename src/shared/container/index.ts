@@ -5,6 +5,8 @@ import { IUsersRepository } from "modules/account/repositories/IUsersRepository"
 import { IUsersTokenRepository } from "modules/account/repositories/IUsersTokenRepository";
 import { container } from "tsyringe";
 import "./providers/DayJSProvider";
+import { ITasksRepository } from "modules/task/repositories/ITasksRepository";
+import { TaskRepository } from "modules/task/implementations/TaskRepository";
 
 container.register<PrismaClient>(
   "PrismaClient",
@@ -19,4 +21,9 @@ container.registerSingleton<IUsersRepository>(
 container.registerSingleton<IUsersTokenRepository>(
   "UsersTokenRepository",
   UsersTokenRepository,
+);
+
+container.registerSingleton<ITasksRepository>(
+  "TasksRepository",
+  TaskRepository,
 );

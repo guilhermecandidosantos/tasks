@@ -17,6 +17,10 @@ class DayJSProvider implements IDayJSProvider {
   compareDates(date01: number, date02: number): boolean {
     return dayjs(date01).isBefore(date02);
   }
+
+  converteDateToUnix(forecastDate: Date): number {
+    return dayjs(forecastDate).unix();
+  }
 }
 
 export { DayJSProvider };

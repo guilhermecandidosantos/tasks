@@ -17,6 +17,7 @@ model User {
   avatarUrl String
   createdAt Int
   userToken UserToken?
+  task      Task[]
 
   @@map("users")
 }
@@ -32,4 +33,17 @@ model UserToken {
   user User @relation(fields: [userId], references: [id])
 
   @@map("usersToken")
+}
+
+model Task {
+  id            String @id
+  userId        String
+  content       String
+  createdDate   Int
+  forecastDate  Int
+  completedDate Int?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("tasks")
 }
